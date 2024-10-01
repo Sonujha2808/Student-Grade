@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Added viewport for responsiveness -->
+    <title>View Grades</title>
+    <style>
+        /* Body and canvas styling */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Full viewport height */
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            overflow: hidden;
+            /* Prevent scrolling */
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        canvas {
+            width: 90vw;
+            /* Set width to 90% of the viewport width */
+            height: 50vh;
+            /* Set height to 50% of the viewport height */
+            max-width: 800px;
+            /* Maximum width of the canvas */
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        a {
+            color: #ffdb58;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            margin-top: 20px;
+            /* Add some margin for spacing */
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Fade-in Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <h1>All Grades</h1>
+    <canvas id="gradesChart"></canvas>
+    <p><a href="{% url 'add_grade' %}">Add a New Grade</a></p>
+
+    <!-- JSON data script -->
+    <script id="grades-data" type="application/json">
+        {{ grades|json_script:"grades-data" }}
+    </script>
+
+    <script>
+        // Retrieve and parse the JSON data for the chart
+        const gradesData = JSON.parse(document.getElementById('grades-data').textContent);
+
+        // Prepare data for the chart
+        const grades = gradesData.filter(grade => grade.score !== null); // Filter out grades with null scores
+        const labels = grades.map(grade => grade.assignment_name);
+        const scores = grades.map(grade => grade.score);
+
+        // Create the chart
+        const ctx = document.getElementById('gradesChart').getContext('2d');
+        const gradesChart = new Chart(ctx, {
+            type: 'bar', // You can change this to 'line', 'pie', etc.
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Scores',
+                    data: scores,
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    borderColor: 'rgba(255, 255, 255, 1)',
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Allows the canvas to resize dynamically
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Assignments'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Scores'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
